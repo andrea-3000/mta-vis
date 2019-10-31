@@ -3,10 +3,14 @@
 Comp 426 final project from team Spicy10.js
 
 ### To Do List
-[ ] Figure out ProtoBuf implementation that will let us parse [GTFS feeds](https://developers.google.com/transit/gtfs-realtime/) from the MTA
-[ ] Implement map-driven visualization to see the train locations in realtime
-[ ] Implement login / user data stores
-[ ] Implement social features like finding other users, watching friends on the map
+
+- [ ] Figure out ProtoBuf implementation that will let us parse [GTFS feeds](https://developers.google.com/transit/gtfs-realtime/) from the MTA
+
+- [ ] Implement map-driven visualization to see the train locations in realtime
+
+- [ ] Implement login / user data stores
+
+- [ ] Implement social features like finding other users, watching friends on the map
 
 
 ------------------------
