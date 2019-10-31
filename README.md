@@ -1,3 +1,15 @@
+# MTABuddy
+
+Comp 426 final project from team Spicy10.js
+
+### To Do List
+[ ] Figure out ProtoBuf implementation that will let us parse [GTFS feeds](https://developers.google.com/transit/gtfs-realtime/) from the MTA
+[ ] Implement map-driven visualization to see the train locations in realtime
+[ ] Implement login / user data stores
+[ ] Implement social features like finding other users, watching friends on the map
+
+
+------------------------
 # Comp426 Backend Server
 
 This template is a simple out of the box solution for a backend server that uses [Express](https://www.npmjs.com/package/express) and [data-store](https://www.npmjs.com/package/data-store) to act as a somewhat "restful" API. You should fork this into your own repository so you can a team can work together using Git. 
