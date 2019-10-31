@@ -11,7 +11,7 @@ Comp 426 final project from team Spicy10.js
 
 ### Backend
 
-See instructions in [the backend's README](https://github.com/andrea-3000/mta-vis).
+See instructions in [the backend's README](https://github.com/andrea-3000/mta-vis/tree/master/server).
 
 ### Basic Project Structure
 
