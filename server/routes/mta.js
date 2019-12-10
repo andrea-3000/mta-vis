@@ -65,18 +65,28 @@ router.get('/status', async function (req, res) {
  */
 router.get('/live', async function(req, res){
   // Get previous station arrivals, or the schedule
-  const prevData = JSON.parse(readFileSync('data/trains.json'));
-  if( (new Date() - new Date(prevData.updatedAt)) < 30*1000 ){
-    debug('Falling back on cached data');
-    return res.send({ type: "subway", cached: true, ...prevData })
+  var cacheFile;
+  try{ cacheFile = readFileSync('data/trains.json') } catch(e) {
+    cacheFile =  null;
+  }
+
+  var prevData, prev;
+  if(cacheFile){
+    prevData = JSON.parse(cacheFile);
+    
+    // if cache is still valid, exit
+    if( (new Date() - new Date(prevData.updatedAt)) < 30*1000 ){
+      debug('Falling back on cached data');
+      return res.send({ type: "subway", cached: true, ...prevData })
+    }
+
+    debug(`Loaded ${prevData.trains.length} previous trains`);
+    prev = prevData.trains.reduce( (o,d) => ({...o, [d.train_id]: d}), {} );
   }
 
   const stations = await mta.stop();
   debug(`Loaded ${stations.length} stations`);
-
-  debug(`Loaded ${prevData.trains.length} previous trains`);
-  const prev = prevData.trains.reduce( (o,d) => ({...o, [d.train_id]: d}), {} );
-
+  
   // Get latest predicted arrivals, merge with old data
   const trains = [];
   var updatedAt = new Date(0);
@@ -99,7 +109,7 @@ router.get('/live', async function(req, res){
         arrival: t.update.stop_time_update[0].arrival && new Date(t.update.stop_time_update[0].arrival.time.low*1000),
         departure: t.update.stop_time_update[0].departure && new Date(t.update.stop_time_update[0].departure.time.low*1000)
       };
-      const prev_stop = !(prev[t.train_id] && prev[t.train_id].next_stop && next_stop) ? {} 
+      const prev_stop = !(prev && prev[t.train_id] && prev[t.train_id].next_stop && next_stop) ? {} 
         : (prev[t.train_id].next_stop.stop_id == next_stop.stop_id) ? prev[t.train_id].prev_stop : prev[t.train_id].next_stop;
       
       const since_departure = prev_stop && new Date(response.updatedOn * 1000) - new Date(prev_stop.departure)
