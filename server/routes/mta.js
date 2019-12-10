@@ -8,7 +8,7 @@ const debug = require('debug')('mta');
 export const router = express.Router();
 export const prefix = '/mta';
 
-const feed_ids = [1, 2, 11, 16, 26, 31, 36, 51];// 21 
+const feed_ids = [1, 2, 11, 16, 21, 26, 31, 36, 51]; 
 const DIRS = [null, 'N', 'E', 'S', 'W'];
 const lines = ['7', '123', '456', 'ACE', 'BDFM', 'G', 'JZ', 'L', 'NQR', 'S', 'SIR', 'FS', 'GS'];
 const routeLine = (id) => {
@@ -76,7 +76,15 @@ router.get('/live', async function(req, res){
   const trains = [];
   var updatedAt = new Date(0);
   await Promise.all(feed_ids.map( async feed => {
-    const response = await mta.positions(feed);
+    var response;
+    try{
+      response = await mta.positions(feed);
+    }catch(e){
+      debug('Error for feed #', feed);
+      debug(e);
+      return;
+    }
+    
     updatedAt = Math.max(updatedAt, new Date(response.updatedOn * 1000));
     
     const data = response.positions.map(t => {

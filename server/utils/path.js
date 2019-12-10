@@ -71,7 +71,7 @@ function findSegment(id, pt){
     debug('falling back to min normal,', min.normal, min.i, min.pct);
     return [min.i, min.pct];
   }else{
-    debug('no match on path for id', id);
+    // debug('no match on path for id', id);
     return [null, null];
   }
 }
