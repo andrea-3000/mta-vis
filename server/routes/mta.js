@@ -85,7 +85,7 @@ router.get('/live', async function(req, res){
   }
 
   const stations = await mta.stop();
-  debug(`Loaded ${stations.length} stations`);
+  debug(`Loaded ${Object.keys(stations).length} stations`);
   
   // Get latest predicted arrivals, merge with old data
   const trains = [];
@@ -95,8 +95,7 @@ router.get('/live', async function(req, res){
     try{
       response = await mta.positions(feed);
     }catch(e){
-      debug('Error for feed #', feed);
-      debug(e);
+      debug('That error was for feed #', feed);
       return;
     }
     
