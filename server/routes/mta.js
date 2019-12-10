@@ -64,11 +64,16 @@ router.get('/status', async function (req, res) {
  * (Updates evey 30 seconds)
  */
 router.get('/live', async function(req, res){
-  const stations = await mta.stop();
-  debug('Loaded stations');
-
   // Get previous station arrivals, or the schedule
   const prevData = JSON.parse(readFileSync('data/trains.json'));
+  if( (new Date() - new Date(prevData.updatedAt)) < 30*1000 ){
+    debug('Falling back on cached data');
+    return res.send({ type: "subway", cached: true, ...prevData })
+  }
+
+  const stations = await mta.stop();
+  debug(`Loaded ${stations.length} stations`);
+
   debug(`Loaded ${prevData.trains.length} previous trains`);
   const prev = prevData.trains.reduce( (o,d) => ({...o, [d.train_id]: d}), {} );
 
@@ -124,7 +129,7 @@ router.get('/live', async function(req, res){
   debug(`${trains.filter(t => !t.train_loc).length} trains have no location`);
   // Write new arrivals to file for next request
   new Promise( (pass, fail) => {
-    writeFile('data/trains.json', JSON.stringify({trains, updatedAt }), (err) => err ? fail(err) : pass());
+    writeFile('data/trains.json', JSON.stringify({ trains, updatedAt }), (err) => err ? fail(err) : pass());
   }).then(() => {
     debug('Wrote new data to data/trains.json');
   });
