@@ -6,14 +6,6 @@ body {
     color: #434343;
 }
 
-#content {
-    margin: 20px;
-}
-
-#content h1, p {
-    margin: 0px;
-}
-
 .subtitle {
     color: #a4a4a4;
 }
