@@ -6,7 +6,10 @@ import cors from "cors";
 import debug from 'debug';
 import bearerToken from "express-bearer-token";
 
+import Mta from "mta-gtfs";
+
 require('dotenv').config();
+
 
 // Loggers used. Environment variables used to limit output
 const debugAutoWire = debug('auto-wire');
