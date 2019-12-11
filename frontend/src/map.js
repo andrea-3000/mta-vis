@@ -21,8 +21,9 @@ let lineColors = ({
     "S": "#808183",
     "1-2-3": "#EE352E",
     "4-5-6": "#00933C",
-    "7": "#B933AD"
+    "7": "#B933AD",
 });
+let ERROR_COLOR = "#FFFF00"; /* bright yellow error color */
 
 function drawLines(map) {
     map.addLayer({
@@ -51,7 +52,7 @@ function drawLines(map) {
                     ["1", "2", "3"], lineColors["1-2-3"],
                     ["4", "5", "6"], lineColors["4-5-6"],
                     ["7"], lineColors["7"],
-                    "#FFFF00", /* bright yellow error color */
+                    ERROR_COLOR,
                 ],
             /* something glitchy happening w/ the data that tthe offset is weird here, not going to do it for now */
             /* "line-offset":
@@ -60,36 +61,104 @@ function drawLines(map) {
                 ], */
         }
 
+    }, 'stops');
+}
+
+async function drawStops(map) {
+    const response = await fetch("https://comp426.peterandringa.com/mta/stations");
+    let stop_data = Object.values(await response.json()).filter( s => !s.stop_id.toString().match(/[NS]$/) );
+    let geojson = stop_data.map( s => ({
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [s.stop_lon, s.stop_lat]
+        }
+    }));
+
+    map.addLayer({
+        id: 'stops',
+        type: 'circle',
+        source: {
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: geojson
+          }
+        },
+        paint: {
+          'circle-radius': 2.5,
+          'circle-color': '#fff',
+          'circle-stroke-width': 1,
+          'circle-stroke-color': '#000'
+        }
     });
 }
 
-async function drawStations(map) {
-    const response = await fetch("https://comp426.peterandringa.com/mta/stations");
-    const json = await response.json();
-    console.log(JSON.stringify(json));
-    /*map.addLayer({
-        "id": "stations",
-        "type": "circle",
-        "source": {
-            "type": "vector",
-            "url": "https://comp426.peterandringa.com/mta/stations"
-        },
-        "layout": {
-            "line-cap": "round",
-            "line-join": "round"
-        },
-        "paint": {
-            "circle-radius": {
-                stops: [[10, 2], [14, 5]]
-            },
-            "circle-color": "#fff"
-        }
+async function drawTrains(map, json) {
+    let response = await fetch("https://comp426.peterandringa.com/mta/live");
+    let train_data = await response.json();
+    let trains = await train_data.trains.map( t => {
+        if (t.train_loc) addTrain(map, t);
+    });
+}
 
-    });*/
+async function updateTrains(map) {
+    //console.log("UPDATING");
+    let updated_response = await fetch("https://comp426.peterandringa.com/mta/live");
+    let updated_data = await updated_response.json();
+    let trains = updated_data.trains.map( t => {
+        let train_id = 'train-'+t.train_id.replace(/ /g, '_');
+        let source = map.getSource(train_id);
+        if (!source){
+            if (t.train_loc) addTrain(map, t);
+        } else {
+            if (t.train_loc) {
+                let updated_loc = {
+                    "type": "Point",
+                    "coordinates": t.train_loc
+                }
+                source.setData(updated_loc);
+            } else {
+                console.error("Received invalid train location when updating, should we remove it?");
+            }
+        }
+    });
+}
+
+function addTrain(map, t) {
+    let train_id = 'train-'+t.train_id.replace(/ /g, '_');
+    map.addSource(train_id, {"type": "geojson", data: { "type": "Point", "coordinates": t.train_loc}});
+    map.addLayer({
+        id: train_id,
+        type: 'circle',
+        source: train_id,
+        paint: {
+            'circle-radius': 4,
+            'circle-color': ["match", t.route_id,
+                ["A", "C", "E"], lineColors["A-C-E"],
+                ["B", "D", "F", "M"], lineColors["B-D-F-M"],
+                ["G"], lineColors["G"],
+                ["J", "Z"], lineColors["J-Z"],
+                ["L"], lineColors["L"],
+                ["N", "Q", "R"], lineColors["N-Q-R-W"],
+                ["S"], lineColors["S"],
+                ["1", "2", "3"], lineColors["1-2-3"],
+                ["4", "5", "6"], lineColors["4-5-6"],
+                ["7"], lineColors["7"],
+                ERROR_COLOR, 
+            ],
+            'circle-stroke-width': 1,
+            'circle-stroke-color': '#000'
+        }
+    });
 }
 
 map.on('load', function() {
     drawLines(map);
-    
 });
-drawStations(map);
+
+drawStops(map).then(drawTrains(map));
+
+setInterval(() => {
+    updateTrains(map);
+}, 30 * 1000);
