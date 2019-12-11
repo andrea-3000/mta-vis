@@ -68,7 +68,7 @@ function findSegment(id, pt){
   }
 
   if(min.normal && min.i && min.pct){
-    debug('falling back to min normal,', min.normal, min.i, min.pct);
+    // debug('falling back to min normal,', min.normal, min.i, min.pct);
     return [min.i, min.pct];
   }else{
     // debug('no match on path for id', id);
@@ -85,6 +85,7 @@ export function interpolatePath(trip_id, pt1, pt2, pct){
       return null;
     }
   }
+
   const [start_i, start_pct] = findSegment(id, pt1);
   const [end_i, end_pct] = findSegment(id, pt2);
 
@@ -101,8 +102,8 @@ export function interpolatePath(trip_id, pt1, pt2, pct){
   while(i < end_i){
     total_len += paths[id][++i].distance;
   }
-  if(end_i == start_i) total_len = 0;
-  if(end_pct && paths[id][i+1]) total_len += paths[id][i+1].distance * end_pct; // last segment
+  if(end_i == start_i && end_pct != null) paths[id][start_i+1].distance * (end_pct - start_pct);
+  if(end_pct != null && paths[id][i+1]) total_len += paths[id][i+1].distance * end_pct; // last segment
   
   // Figure out our proportation
   var target_len = total_len * pct;  
@@ -115,4 +116,82 @@ export function interpolatePath(trip_id, pt1, pt2, pct){
 
   // Interpolate the two points on either side of the target, to get the value
   return interpolate(paths[id][target_i-1], paths[id][target_i], target_pct);
+}
+
+export function getWaypoints(trip_id, pt, stops, now){
+  var id = trip_id.split('_')[1];
+  if(!paths[id]) {
+    id = Object.keys(paths).find( k => k.replace('..', '.').indexOf(id.replace('..', '.')) == 0 );
+    if(!id) {
+      debug('no matching waypoint route found for trip', trip_id);
+      return null;
+    }
+  }
+  
+  const waypoints = [];
+  var total_time = now;
+  var stop_i = 0;
+  var [start_i, start_pct] = findSegment(id, pt);
+  // debug(`Starting waypoints, now is ${now}`);
+  while(stop_i < stops.length && total_time < now + 60){
+    var [end_i, end_pct] = findSegment(id, [stops[stop_i].stop_lon, stops[stop_i].stop_lat])
+    // debug(`Start_i is ${start_i}, ${start_pct}. End_i is ${end_i}, ${end_pct}`);
+    
+    // Count up total desired length
+    var i = start_i+1;
+    if(i >= paths[id].length) debug('uh oh')
+    // console.log(start_i, i, start_pct, paths[id].length)
+    var total_len = paths[id][i].distance * (1-start_pct);
+    while(i < end_i){
+      total_len += paths[id][++i].distance;
+    }
+    if(end_i == start_i) total_len = paths[id][start_i+1].distance * (end_pct - start_pct);
+    if(end_pct && paths[id][i+1]) total_len += paths[id][i+1].distance * end_pct; // last segment
+
+    // calculate speed
+    const time_per = (stops[stop_i].arrival - (stop_i==0 ? now : stops[stop_i-1].departure)) / total_len;
+    
+    // negative speed means we already should be there
+    if(time_per < 0) {
+      start_i = end_i;
+      start_pct = end_pct;
+      stop_i++;
+      continue;
+    }
+
+    // debug(`Total len is ${total_len} across ${end_i-start_i} (${start_pct}->${end_pct}) segments heading toward ${stops[stop_i].stop_name}. Time per is ${time_per}`);
+    
+    // build up waypoints array
+    i = start_i;
+    while(i < end_i){
+      i++;
+      waypoints.push({
+        start: total_time,
+        duration: time_per * paths[id][i].distance,
+        loc: paths[id][i]
+      });
+      total_time += waypoints[waypoints.length-1].duration;
+      
+      if(i-1 == start_i) waypoints[waypoints.length-1].duration *= 1-start_pct;
+    }
+
+    // last waypoint
+    if(paths[id][i+1] && paths[id][i+1].distance && end_pct){
+      waypoints.push({
+        start: total_time,
+        duration: time_per * paths[id][i+1].distance * end_pct,
+        loc: interpolate(paths[id][i], paths[id][i+1], end_pct)
+      });
+    }
+
+    // pause for time at stop
+    total_time += stops[stop_i].departure - stops[stop_i].arrival;
+    
+    // update start i / pct for the next stop
+    start_i = end_i;
+    start_pct = end_pct;
+    stop_i++;
+  }
+
+  return waypoints;
 }
