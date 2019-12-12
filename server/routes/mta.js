@@ -44,10 +44,15 @@ router.get('/stations/:id', async function (req, res) {
  * Get a specific MTA station schedule
  */
 router.get('/stations/:id/schedule', async function (req, res) {
+  const errors = null;
   const schedules = (await Promise.all(
     feed_ids.map( feed =>
       mta.schedule(req.params.id, feed)
-        .catch(e => console.log(`Error loading schedule for feed #${feed}.`))
+        .catch(e => {
+          console.log(`Error loading schedule for feed #${feed}.`);
+          errors = e;
+          return {};
+        })
     )
   )).filter(s => s.updatedOn)
     .reduce( (o,s) => {
@@ -62,7 +67,7 @@ router.get('/stations/:id/schedule', async function (req, res) {
       return o;
     }, {});
   
-  res.send({ stop_id: req.params.id, schedules });
+  res.send({ stop_id: req.params.id, schedules, errors });
 });
 
 /**
