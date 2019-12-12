@@ -26,7 +26,9 @@ const mta = new Mta({
  * Get a list of MTA stations
  */
 router.get('/stations', async function (req, res) {
-  const stations = await mta.stop();
+  const stations = Object.values(await mta.stop())
+    .filter( s => !s.stop_id.toString().match(/[NS]$/));
+
   res.send(stations);
 });
 
@@ -42,8 +44,22 @@ router.get('/stations/:id', async function (req, res) {
  * Get a specific MTA station schedule
  */
 router.get('/stations/:id/schedule', async function (req, res) {
-  const schedule = await mta.schedule(req.params.id);
-  res.send(schedule);
+  const schedules = (await Promise.all(
+    feed_ids.map( feed => mta.schedule(req.params.id, feed) )
+  )).filter(s => s.updatedOn)
+    .reduce( (o,s) => {
+      const line = routeLine(Object.values(s.schedule[req.params.id])[0][0].routeId);
+      if(!o[line]) o[line] = {};
+      if(!o[line].N) o[line].N = [];
+      if(!o[line].S) o[line].S = [];
+
+      o[line].N.push(...s.schedule[req.params.id].N)
+      o[line].S.push(...s.schedule[req.params.id].S);
+
+      return o;
+    }, {});
+  
+  res.send({ stop_id: req.params.id, schedules });
 });
 
 /**
