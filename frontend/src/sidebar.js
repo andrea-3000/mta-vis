@@ -1,5 +1,5 @@
 import API from "./api";
-import renderSchedule from "./map";
+import { renderSchedule } from "./map";
 
 const container = document.querySelector('.map-overlay-right')
 
@@ -15,14 +15,27 @@ document.querySelector('.right__button')
 
 // Renders favs
 async function renderFavorites(){
-  const favs = await API.getFavorites(); // array of favs
-  //renderSchedule(id, name, numTrains);
+  const favs = window._FAVORITES || await API.getFavorites(); // array of favs
+  const stops = (await window._STOPS).filter( stop => favs.has(stop.stop_id.toString()) );
+
+  if(!stops || stops.length == 0){
+    return '<div class="user-favs__empty"><span>Search for stops to add them to your favorites</span></div>';
+  }
+
+  const container = document.createElement('div');
+  container.classList.add('favs__container');
+  for(const stop of stops){
+    console.log('rendering stop', stop);
+    container.appendChild( await renderSchedule(stop.stop_id, stop.stop_name, 2) )
+  }
+
+  return container;
 }
 
 // Function to hide login screen and set user
 var currentUser;
 window._LOGGED_IN = false;
-export function setUser(name){
+export async function setUser(name){
   if(!name) name = currentUser;
   else currentUser = name;
 
@@ -35,7 +48,7 @@ export function setUser(name){
   for(const f of fills) f.innerText = name;
 
   document.querySelector('.user-favs__list')
-    .appendChild( renderFavorites() );
+    .innerHTML = (await renderFavorites()).innerHTML;
 }
 function undoUser(){
   window._LOGGED_IN = false;
@@ -45,6 +58,8 @@ function undoUser(){
 
   const fills = document.querySelectorAll('[data-fill="username"]');
   for(const f of fills) f.innerText = "";
+
+  document.querySelector('.user-favs__list').innerHtml = "";
 }
 
 // Test initial login status

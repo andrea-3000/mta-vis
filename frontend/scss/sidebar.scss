@@ -122,6 +122,10 @@
 
 .user-favs {
   min-height: 100px;
+
+  & > h6 {
+    margin-top: 1em;
+  }
 }
 
 .user-favs__header {
@@ -135,5 +139,46 @@
   .user-favs__logout {
     flex: 0 0 auto;
     color: $grey;
+  }
+}
+
+.user-favs__list {
+  margin-top: 1em;
+
+  h3 {
+    font-size: 1rem;
+    font-weight: normal;
+  }
+
+  .station-popup {
+    margin-top: 1em;
+  }
+
+  .popup__title .line-group {
+    flex-basis: auto;
+    flex: 0 0 auto;
+    margin-left: 0.5em;
+  }
+
+  .popup__title h3 {
+    flex: 0 0 auto;
+  }
+
+  .popup__directions {
+    margin-left: 1.7rem;
+    position: relative;
+    top: -0.25em;
+  }
+
+  .popup__error {
+    font-size: 0.8rem;
+    min-height: 50px;
+  }
+
+  .line-group__line {
+    width: 0.8rem;
+    height: 0.8rem;
+    line-height: 0.8rem;
+    font-size: 0.7rem;
   }
 }

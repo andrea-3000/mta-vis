@@ -80,8 +80,8 @@ export function eraseCookie(name) {
 
 export function addFavorite(stop_id){
   window._FAVORITES.add(stop_id);
-
-  return fetch(API_BASE+'/user/favorites', {
+  console.log('new ', window._FAVORITES);
+  return fetch(API_BASE+'/user/favorites/'+stop_id, {
     method: 'POST',
     headers: {
       "Content-Type": "application/json; charset=utf-8",
@@ -89,8 +89,9 @@ export function addFavorite(stop_id){
     },
     body: JSON.stringify({
       data: {
-        [stop_id]: true 
-      }
+        chosen: true 
+      },
+      type: "merge"
     })
   }).then(d => d.json());
 }
@@ -115,8 +116,8 @@ export function getFavorites(){
   .then(d => d.json())
   .then(d => {
     const res = Object.keys(d.result);
-    window._FAVORITES = new Set(res);
-    return res;
+    console.log('got results', res);
+    return window._FAVORITES = new Set(res);;
   });
 }
 getFavorites().then(d => console.log(d));

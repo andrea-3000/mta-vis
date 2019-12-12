@@ -62,9 +62,13 @@ async function drawLines(map) {
     }, "stops");
 }
 
+var stopsDone;
+window._STOPS = new Promise( (resolve, reject) => { stopsDone = resolve; })
 async function drawStops(map) {
     const response = await fetch("https://comp426.peterandringa.com/mta/stations");
     let stop_data = await response.json();
+    stopsDone(stop_data);
+
     let geojson = stop_data.map( s => ({
         type: "Feature",
         "properties": {
@@ -211,7 +215,7 @@ export async function showPopup(id, name, coordinates) {
         closeOnClick: true
     })
         .setLngLat(coordinates)
-        .setHTML(renderSchedule(id, name, 2).innerHTML);
+        .setHTML( (await renderSchedule(id, name, 2)).innerHTML );
 
     popup.addTo(map);
 
