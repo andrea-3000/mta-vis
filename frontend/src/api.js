@@ -115,8 +115,8 @@ export function getFavorites(){
   })
   .then(d => d.json())
   .then(d => {
+    if(!d || !d.result) return window._FAVORITES = new Set();
     const res = Object.keys(d.result);
-    console.log('got results', res);
     return window._FAVORITES = new Set(res);;
   });
 }

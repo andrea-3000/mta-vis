@@ -17,9 +17,11 @@ document.querySelector('.right__button')
 async function renderFavorites(){
   const favs = window._FAVORITES || await API.getFavorites(); // array of favs
   const stops = (await window._STOPS).filter( stop => favs.has(stop.stop_id.toString()) );
-
+  console.log(favs, stops);
   if(!stops || stops.length == 0){
-    return '<div class="user-favs__empty"><span>Search for stops to add them to your favorites</span></div>';
+    return { 
+      innerHTML: '<div class="user-favs__empty"><span>Search for stops to add them to your favorites!</span></div>'
+    };
   }
 
   const container = document.createElement('div');
