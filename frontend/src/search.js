@@ -2,10 +2,22 @@ import { map } from '../src/map.js';
 
 const lines = ['7', '123', '456', 'ACE', 'BDFM', 'G', 'JZ', 'L', 'NQR', 'S', 'SIR', 'FS', 'GS'];
 const lineForRoute = (id) => {
-  if(id == 'S') return id; // special case for s, which overlaps with SIR/shuttles
-  if(id == 'H') return 'ACE'; // special case for weird H train
-  return lines.find( ln => ln.indexOf(id) != -1 );
+    if(id == 'S') return id; // special case for s, which overlaps with SIR/shuttles
+    if(id == 'H') return 'ACE'; // special case for weird H train
+    return lines.find( ln => ln.indexOf(id) != -1 );
 };
+
+const DEFAULT_DEBOUNCE = 100;
+const debounce = function debounce(time, fn){
+    var debounceTimer;
+    return function(...args){
+        if(debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            fn.bind(this)(...args);
+            debounceTimer = null;
+        }, time);
+    };
+}
 
 const renderLineIcons = (line) => {
     const icons = document.createElement('div');
@@ -31,7 +43,7 @@ async function loadAutocomplete() {
 
     let currentFocus;
 
-    input.addEventListener("input", function(e) {
+    input.addEventListener("input", debounce(DEFAULT_DEBOUNCE, function(e) {
         let value = this.value;
         
         removeItems();
@@ -61,7 +73,7 @@ async function loadAutocomplete() {
             });
             list.appendChild(result);
         });
-    });
+    }));
 
     /*execute a function presses a key on the keyboard:*/
     input.addEventListener("keydown", function(e) {
