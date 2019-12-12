@@ -58,43 +58,6 @@ button {
     }
 }
 
-.ac-items div {
-    padding: 10px;
-    cursor: pointer;
-}
-
-.ac-items div:hover {
-    /*when hovering an item:*/
-    background-color: #e9e9e9; 
-}
-
-.ac-active {
-    /*when navigating through the items using the arrow keys:*/
-    background-color: #e9e9e9; 
-}
-
-.mapboxgl-popup-content {
-    padding: 10px;
-    width: 220px;
-    max-height: 150px;
-    overflow-y: scroll;
-}
-
-.popup-star {
-    /* i literally cannot do any CSS. this is my curse */
-}
-
-/** NASTY PLACEHOLDER **/
-::-webkit-input-placeholder {
-    font-size: 15px;
-}
-::-moz-placeholder {
-    font-size: 15px;
-}
-:-ms-input-placeholder {
-    font-size: 15px;
-}
-
 h6 {
     margin: 0;
     font-weight: 600;

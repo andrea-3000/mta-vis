@@ -1,0 +1,85 @@
+@import "mixins";
+
+.mapboxgl-popup-content {
+  padding: 10px;
+  width: 260px;
+  max-height: 150px;
+  overflow-y: scroll;
+  border-radius: 10px;
+}
+
+.popup__fav {
+  cursor: pointer;
+  color: #212121;
+  &:hover, &.fav--active {
+    color: $yellow;
+    transform: scale(0.98);
+  }
+}
+
+.mapboxgl-popup-content .line-group__line {
+  width: 0.8rem;
+  height: 0.8rem;
+  line-height: 0.8rem;
+  font-size: 0.6rem;
+}
+
+.popup__title, .popup__row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.popup__title h3 {
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+.popup__title .line-group,
+.popup__row .line-group {
+  flex: 0 0 auto;
+  margin: 0.25em 0;
+}
+
+.popup__title .popup__fav {
+  flex: 0 0 auto;
+  margin-right: 0.5em;
+}
+.popup__title h3 {
+  flex: 1 0 auto;
+}
+.popup__title .line-group {
+  flex-basis: 100%;
+  margin-left: 1.7em;
+}
+
+.popup__row .popup__train {
+  margin-left: 0.5em;
+}
+
+.popup__directions {
+  display: flex;
+  flex-direction: row;
+  margin-top: 0.5em;
+}
+.popup__directions > div {
+  flex: 1 1 auto;
+}
+
+.popup__error {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100px;
+}
+
+.popup__error > span {
+  width: 75%;
+  flex: 0 0 auto;
+  color: $grey;
+  text-align: center;
+}
+

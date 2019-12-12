@@ -73,8 +73,52 @@ export function eraseCookie(name) {
   document.cookie = name+'=; Max-Age=-99999999;';  
 };
 
+export function addFavorite(stop_id){
+  window._FAVORITES.add(stop_id);
+  
+  return fetch(API_BASE+'/user/favorites', {
+    method: 'POST',
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "Authorization": "Bearer "+getCookie('jwt')
+    },
+    body: JSON.stringify({
+      data: {
+        [stop_id]: true 
+      }
+    })
+  }).then(d => d.json());
+}
+
+export function removeFavorite(stop_id){
+  window._FAVORITES.delete(stop_id);
+
+  return fetch(API_BASE+'/user/favorites/'+stop_id, {
+    method: 'DELETE',
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "Authorization": "Bearer "+getCookie('jwt')
+    }
+  }).then(d => d.json());
+}
+
+export function getFavorites(){
+  return fetch(API_BASE+'/user/favorites', {
+    method: 'GET',
+    headers: { "Authorization": "Bearer "+getCookie('jwt') }
+  })
+  .then(d => d.json())
+  .then(d => {
+    const res = Object.keys(d.result);
+    window._FAVORITES = new Set(res);
+    return res;
+  });
+}
+getFavorites().then(d => console.log(d));
+
 export default {
   userExists, checkLogin,
   loginUser, createUser, createAndLogin,
-  setCookie, getCookie, eraseCookie
+  setCookie, getCookie, eraseCookie,
+  addFavorite, removeFavorite, getFavorites
 };

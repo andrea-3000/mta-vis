@@ -13,7 +13,13 @@ document.querySelector('.right__button')
   });
 
 // Function to hide login screen and set user
-function setUser(name){
+var currentUser;
+window._LOGGED_IN = false;
+export function setUser(name){
+  if(!name) name = currentUser;
+  else currentUser = name;
+
+  window._LOGGED_IN = true;
   console.log(`Welcome, ${name}!`);
   document.querySelector('.login-form').classList.add('hidden');
   document.querySelector('.user-favs').classList.remove('hidden');
@@ -22,6 +28,7 @@ function setUser(name){
   for(const f of fills) f.innerText = name;
 }
 function undoUser(){
+  window._LOGGED_IN = false;
   console.log(`Goodbye!`);
   document.querySelector('.login-form').classList.remove('hidden');
   document.querySelector('.user-favs').classList.add('hidden');

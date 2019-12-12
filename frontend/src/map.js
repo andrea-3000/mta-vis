@@ -1,10 +1,11 @@
 import { lineForRoute, renderLineIcons, renderLineIcon } from '../src/search.js';
+import API from './api.js';
+import { setUser } from './sidebar.js';
 
 // Helpers
 const interpolate = (p1, p2, pct) => [ p2[0]*pct+p1[0]*(1-pct), p2[1]*pct+p1[1]*(1-pct) ];
 
 mapboxgl.accessToken = "pk.eyJ1IjoiYW5kcmVhLTMwMDAiLCJhIjoiY2szZGtmbnB3MHBlczNib2swM29iM3dyMCJ9.ND3AF3iabUCSJJvHse4Mjg";
-
 
 export let map = new mapboxgl.Map({
     container: "map",
@@ -207,63 +208,99 @@ export async function showPopup(id, name, coordinates) {
     const schedule_response = await fetch(`https://comp426.peterandringa.com/mta/stations/${id}/schedule`);
     let schedule_data = await schedule_response.json();
 
-    let northbound = schedule_data.schedules[Object.keys(schedule_data.schedules)[0]].N;
-    let southbound = schedule_data.schedules[Object.keys(schedule_data.schedules)[0]].S;
-
     let popupDiv = document.createElement("div");
-    popupDiv.classList.add("popup");
+    popupDiv.classList.add("station-popup");
 
-    let favoriteBtn = document.createElement("button");
+    let titleRow = document.createElement("div");
+    titleRow.classList.add('popup__title');
+
+    let favoriteBtn = document.createElement("div");
+    favoriteBtn.id = "fav-btn-"+id;
+    favoriteBtn.classList.add('popup__fav');
+    if(window._FAVORITES && window._FAVORITES.has(id)){
+        favoriteBtn.classList.add('fav--active');
+    }
     let star = document.createElement("i");
-    star.classList.add("fas", "fa-star", "popup-star");
-
+    star.classList.add("fas", "fa-star");
     favoriteBtn.appendChild(star);
-    favoriteBtn.addEventListener("click", function(e) {
-        console.log("TODO: add to favorites");
-    });
-
-    popupDiv.appendChild(favoriteBtn);
+    titleRow.appendChild(favoriteBtn);
 
     let h3 = document.createElement("h3");
     h3.textContent = name;
-    popupDiv.appendChild(h3);
+    titleRow.appendChild(h3);
 
-    popupDiv.appendChild(renderLineIcons( lineForRoute(id[0]) ));
+    titleRow.appendChild( renderLineIcons( lineForRoute(id[0]) ) );
 
-    if (northbound) {
-        let nb = document.createElement("div");
-        nb.classList.add("northbound");
 
-        let nbHeader = document.createElement("h6");
-        nbHeader.textContent = "NORTHBOUND";
-        nb.appendChild(nbHeader);
+    popupDiv.appendChild(titleRow);
 
-        for (let i = 0; i < northbound.length; i++) {
-            nb.appendChild(renderLineIcon(lineForRoute(id[0]), northbound[i].routeId));
-            let train = document.createElement("p");
-            train.textContent = `${display_date(new Date(northbound[i].arrivalTime * 1000))}`;
-            nb.appendChild(train);
+    if(Object.keys(schedule_data.schedules).length == 0){
+        let errorMsg = document.createElement('div');
+        errorMsg.classList.add('popup__error')
+        errorMsg.innerHTML = '<span>MTA is currently not providing arrival times for this line.</span>';
+        popupDiv.append(errorMsg);
+    } else  {
+        let northbound = schedule_data.schedules[Object.keys(schedule_data.schedules)[0]].N
+            .filter( d => Date.now() < new Date(d.arrivalTime*1000) )
+            .slice(0,5);
+        let southbound = schedule_data.schedules[Object.keys(schedule_data.schedules)[0]].S
+            .filter( d => Date.now() < new Date(d.arrivalTime*1000) )
+            .slice(0,5);
+        console.log(northbound, southbound);
+
+        let trainTimes = document.createElement('div');
+        trainTimes.classList.add('popup__directions');
+        if (northbound) {
+            let nb = document.createElement("div");
+            nb.classList.add("northbound");
+
+            let nbHeader = document.createElement("h6");
+            nbHeader.textContent = "NORTHBOUND";
+            nb.appendChild(nbHeader);
+
+            for (let i = 0; i < northbound.length; i++) {
+                let row = document.createElement('div');
+                row.classList.add('popup__row');
+
+                row.appendChild(renderLineIcon(lineForRoute(id[0]), northbound[i].routeId));
+                
+                let train = document.createElement("div");
+                train.classList.add('popup__train')
+                train.textContent = `${display_date(new Date(northbound[i].arrivalTime * 1000))}`;
+                row.appendChild(train);
+
+                nb.appendChild(row);
+            }
+
+            trainTimes.appendChild(nb);
         }
 
-        popupDiv.appendChild(nb);
-    }
+        if (southbound) {
+            let sb = document.createElement("div");
+            sb.classList.add("southbound");
 
-    if (southbound) {
-        let sb = document.createElement("div");
-        sb.classList.add("southbound");
+            let sbHeader = document.createElement("h6");
+            sbHeader.textContent = "SOUTHBOUND";
+            sb.appendChild(sbHeader);
 
-        let sbHeader = document.createElement("h6");
-        sbHeader.textContent = "SOUTHBOUND";
-        sb.appendChild(sbHeader);
+            for (let i = 0; i < southbound.length; i++) {
+                let row = document.createElement('div');
+                row.classList.add('popup__row');
 
-        for (let i = 0; i < southbound.length; i++) {
-            sb.appendChild(renderLineIcon(lineForRoute(id[0]), southbound[i].routeId));
-            let train = document.createElement("p");
-            train.textContent = `${display_date(new Date(southbound[i].arrivalTime * 1000))}`;
-            sb.appendChild(train);
+                row.appendChild(renderLineIcon(lineForRoute(id[0]), southbound[i].routeId));
+                
+                let train = document.createElement("div");
+                train.classList.add('popup__train')
+                train.textContent = `${display_date(new Date(southbound[i].arrivalTime * 1000))}`;
+                row.appendChild(train);
+
+                sb.appendChild(row);
+            }
+            
+            trainTimes.appendChild(sb);
         }
-        
-        popupDiv.appendChild(sb);
+
+        popupDiv.append(trainTimes);
     }
 
     let popup = new mapboxgl.Popup({
@@ -274,6 +311,21 @@ export async function showPopup(id, name, coordinates) {
         .setHTML(popupDiv.innerHTML);
 
     popup.addTo(map);
+
+    console.log('add listener', document.querySelector('#fav-btn-'+id));
+    document.querySelector('#fav-btn-'+id)
+    .addEventListener('click', function(){
+        console.log('clickity click')
+        if(!window._LOGGED_IN) return;
+        if(window._FAVORITES.has(id)){
+            API.removeFavorite(id);
+            this.classList.remove('fav--active');
+        }else{
+            API.addFavorite(id);
+            this.classList.add('fav--active');
+        }
+        setUser();
+    });
 }
 
 map.on('click', 'stops', async function(e) {

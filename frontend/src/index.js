@@ -1,4 +1,6 @@
 import '../scss/main.scss';
+
+import '../scss/map.scss';
 import '../src/map.js';
 
 import '../scss/sidebar.scss';
