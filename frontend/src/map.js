@@ -1,15 +1,18 @@
 //import { V4MAPPED } from "dns";
 
 mapboxgl.accessToken = "pk.eyJ1IjoiYW5kcmVhLTMwMDAiLCJhIjoiY2szZGtmbnB3MHBlczNib2swM29iM3dyMCJ9.ND3AF3iabUCSJJvHse4Mjg";
+let station_json;
 
 var map = new mapboxgl.Map({
     container: "map",
     style: "mapbox://styles/mapbox/light-v10",
-    center: [-73.8995131, 40.72],
-    zoom: 11.75
+    center: [-73.9864468, 40.7417373],
+    zoom: 12.15,
+    trackResize: true
 });
 
 //40.7454736,-73.8995131,12.15
+//40.7417373,-73.9864468,13.45
 
 let lineColors = ({
     "A-C-E": "#0039A6",
@@ -53,7 +56,8 @@ async function drawLines(map) {
 
 async function drawStops(map) {
     const response = await fetch("https://comp426.peterandringa.com/mta/stations");
-    let stop_data = Object.values(await response.json()).filter( s => !s.stop_id.toString().match(/[NS]$/) );
+    station_json = await response.json();
+    let stop_data = Object.values(station_json).filter( s => !s.stop_id.toString().match(/[NS]$/) );
     let geojson = stop_data.map( s => ({
         type: "Feature",
         geometry: {

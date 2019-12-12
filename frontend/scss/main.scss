@@ -11,7 +11,80 @@ body {
 }
 
 #map {
-    width:100%;
-    height: 100%;
     position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.map-overlay-left {
+    position: absolute;
+    min-width: 350px;
+    padding: 10px;
+    top: 0;
+    left: 0;
+}
+
+.map-overlay-box {
+    background-color: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    padding: 5px;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.map-overlay-title {
+    text-shadow: 0 3px 4px rgba(0, 0, 0, 0.2);
+    text-align: left;
+    margin: 20px;
+    right: 0;
+}
+
+.map-overlay-content {
+    margin: 10px;
+}
+
+.search {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+}
+
+#search-button {
+    font-size: larger;
+    border: 0;
+    background-color: #fff;
+    right: 0;
+}
+  
+input {
+    font-family: 'Roboto Mono', monospace;
+    position: relative;
+    line-height: 20px;
+    padding: 10px 25px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    border-radius: 3px;
+}
+
+h1 {
+    line-height: 24px;
+    display: block;
+    margin: 0 0 15px;
+}
+
+/** NASTY PLACEHOLDER **/
+::-webkit-input-placeholder {
+    font-size: 15px;
+}
+::-moz-placeholder {
+    font-size: 15px;
+}
+:-ms-input-placeholder {
+    font-size: 15px;
+}
+::placeholder {
+    font-size: 15px;
 }

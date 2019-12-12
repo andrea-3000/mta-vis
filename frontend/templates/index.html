@@ -7,12 +7,19 @@
     <link rel="stylesheet" type="text/css" href="style.css">
   </head>
   <body>
-    <div id="content">
-        <div>
-            <div id="map"></div>
-            <h1 id="title">MTABuddy</h1>
-            <p class="subtitle">by spicy10.js</p>
+    <div id="map"></div>
+
+    <div class="map-overlay-left">
+      <div class="map-overlay-box">
+        <div class="map-overlay-content">
+          <div class="search">
+              <input type="text" id="station-search" name="station-search" placeholder="Search Stations">
+              <button id="search-button" type="submit"><i class="fas fa-search" aria-hidden="true"></i></button>
+          </div>
         </div>
+      </div>
     </div>
+
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
   </body>
 </html>
