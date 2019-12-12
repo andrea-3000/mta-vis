@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css?family=Roboto+Mono:400,400i,700,700i&display=swap&subset=latin-ext');
+@import "mixins";
 
 body {
-    background-color: #f4f4f4;
-    font-family: 'Roboto Mono', monospace;
-    color: #434343;
+    background-color: #ffffff;
+    font-family: $font-stack;
+    color: $text-dark;
 }
 
 .subtitle {
@@ -60,13 +60,18 @@ body {
 }
   
 input {
-    font-family: 'Roboto Mono', monospace;
     position: relative;
     line-height: 20px;
-    padding: 10px 25px;
+    padding: 10px 15px;
     border: 1px solid #ccc;
     box-sizing: border-box;
     border-radius: 3px;
+    font-size: 1rem;
+    outline: none;
+
+    @include placeholder {
+        @include smallcaps;
+    }
 }
 
 h1 {
@@ -75,16 +80,28 @@ h1 {
     margin: 0 0 15px;
 }
 
-/** NASTY PLACEHOLDER **/
-::-webkit-input-placeholder {
-    font-size: 15px;
+button {
+	border: none;
+	cursor: pointer;
+    outline: inherit;
+    @include smallcaps;
+    background: $blue;
+    color: white;
+    font-size: 12px;
+    padding: 0.7em 0.9em;
+    border-radius: 3px;
+
+    &:hover {
+        background: $darkblue;
+    }
+    &:active {
+        transform: scale(0.99);
+    }
 }
-::-moz-placeholder {
-    font-size: 15px;
-}
-:-ms-input-placeholder {
-    font-size: 15px;
-}
-::placeholder {
-    font-size: 15px;
+
+h6 {
+    margin: 0;
+    font-weight: 600;
+    color: $text-gray;
+    @include smallcaps;
 }
