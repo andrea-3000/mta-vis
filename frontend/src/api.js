@@ -37,7 +37,12 @@ export function createUser(name, pass) {
     headers: {
       "Content-Type": "application/json; charset=utf-8"
     },
-    body: JSON.stringify({ name, pass })
+    body: JSON.stringify({ 
+      name, pass,
+      data: {
+        'favorites': {}
+      } 
+    })
   }).then(res => res.json());
 }
 
@@ -75,7 +80,7 @@ export function eraseCookie(name) {
 
 export function addFavorite(stop_id){
   window._FAVORITES.add(stop_id);
-  
+
   return fetch(API_BASE+'/user/favorites', {
     method: 'POST',
     headers: {
