@@ -45,7 +45,10 @@ router.get('/stations/:id', async function (req, res) {
  */
 router.get('/stations/:id/schedule', async function (req, res) {
   const schedules = (await Promise.all(
-    feed_ids.map( feed => mta.schedule(req.params.id, feed) )
+    feed_ids.map( feed =>
+      mta.schedule(req.params.id, feed)
+        .catch(e => console.log(`Error loading schedule for feed #${feed}.`))
+    )
   )).filter(s => s.updatedOn)
     .reduce( (o,s) => {
       const line = routeLine(Object.values(s.schedule[req.params.id])[0][0].routeId);
