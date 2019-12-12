@@ -1,3 +1,5 @@
+import { lineForRoute, renderLineIcons } from '../src/search.js';
+
 // Helpers
 const interpolate = (p1, p2, pct) => [ p2[0]*pct+p1[0]*(1-pct), p2[1]*pct+p1[1]*(1-pct) ];
 
@@ -208,6 +210,8 @@ export async function showPopup(id, name, coordinates) {
 
     let northbound = schedule_data.schedules[Object.keys(schedule_data.schedules)[0]].N;
     let southbound = schedule_data.schedules[Object.keys(schedule_data.schedules)[0]].S;
+
+    
 
     let html = `
         <div class="popup">

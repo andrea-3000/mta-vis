@@ -17,55 +17,6 @@ body {
     top: 0;
     bottom: 0;
 }
-
-.map-overlay-left {
-    position: absolute;
-    min-width: 350px;
-    padding: 10px;
-    top: 0;
-    left: 0;
-}
-
-.map-overlay-box {
-    background-color: #fff;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
-    padding: 5px;
-    margin-bottom: 10px;
-    width: 100%;
-    //max-height: 500px;
-}
-
-.map-overlay-title {
-    text-shadow: 0 3px 4px rgba(0, 0, 0, 0.2);
-    text-align: left;
-    margin: 20px;
-    right: 0;
-}
-
-.map-overlay-content {
-    margin: 10px;
-}
-
-.search {
-    width: 100%;
-    height: 100%;
-    padding: 0;
-}
-
-.autocomplete {
-    /*the container must be positioned relative:*/
-    position: relative;
-    display: inline-block;
-}
-
-#search-button {
-    display: inline-block;
-    font-size: larger;
-    border: 0;
-    right: 0;
-    background-color: #fff;
-}
   
 input {
     position: relative;
@@ -149,4 +100,68 @@ h6 {
     font-weight: 600;
     color: $text-gray;
     @include smallcaps;
+}
+
+.line-group {
+    display: block;
+    display: flex;
+    flex-direction: row;
+    margin: 1rem 0;
+    align-items: center;
+}
+.line-group__line {
+    flex: 0 0 auto;
+    display: block;
+    padding: 0.25em;
+    background: #ccc;
+    border-radius: 50%;
+    width: 1.5em;
+    height: 1.5rem;  
+    line-height: 1.5rem;
+    text-align: center;  
+    margin-right: 1px;
+}
+.group--bdfm .line-group__line {
+    background: $linecolor-BDFM;
+    color: $textcolor-BDFM;
+}
+.group--ace .line-group__line {
+    background: $linecolor-ACE;
+    color: $textcolor-ACE;
+}
+.group--123 .line-group__line {
+    background: $linecolor-123;
+    color: $textcolor-123;
+}
+.group--456 .line-group__line {
+    background: $linecolor-456;
+    color: $textcolor-456;
+}
+.group--g .line-group__line {
+    background: $linecolor-G;
+    color: $textcolor-G;
+}
+.group--7 .line-group__line {
+    background: $linecolor-7;
+    color: $textcolor-7;
+}
+.group--l .line-group__line {
+    background: $linecolor-L;
+    color: $textcolor-L;
+}
+.group--nqr .line-group__line {
+    background: $linecolor-NQR;
+    color: $textcolor-NQR;
+}
+.group--jz .line-group__line {
+    background: $linecolor-JZ;
+    color: $textcolor-JZ;
+}
+.group--s .line-group__line {
+    background: $linecolor-S;
+    color: $textcolor-S;
+}
+.group--sir .line-group__line {
+    background: $linecolor-SIR;
+    color: $textcolor-SIR;
 }
