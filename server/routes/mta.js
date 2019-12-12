@@ -2,7 +2,7 @@ import express from "express";
 
 import Mta from "mta-gtfs";
 import { writeFile, readFileSync } from "fs";
-import { interpolatePath } from "../utils/path";
+import { interpolatePath, getWaypoints } from "../utils/path";
 const debug = require('debug')('mta');
 
 export const router = express.Router();
@@ -75,7 +75,7 @@ router.get('/live', async function(req, res){
     prevData = JSON.parse(cacheFile);
     
     // if cache is still valid, exit
-    if( (new Date() - new Date(prevData.updatedAt)) < 30*1000 ){
+    if( (Date.now()/1000 - prevData.updatedAt) < 30 && req.headers["cache-control"] != 'no-cache' ){
       debug('Falling back on cached data');
       return res.send({ type: "subway", cached: true, ...prevData })
     }
@@ -88,8 +88,8 @@ router.get('/live', async function(req, res){
   debug(`Loaded ${Object.keys(stations).length} stations`);
   
   // Get latest predicted arrivals, merge with old data
-  const trains = [];
-  var updatedAt = new Date(0);
+  var trains = [];
+  var updatedAt = 0;
   await Promise.all(feed_ids.map( async feed => {
     var response;
     try{
@@ -99,41 +99,50 @@ router.get('/live', async function(req, res){
       return;
     }
     
-    updatedAt = Math.max(updatedAt, new Date(response.updatedOn * 1000));
+    updatedAt = Math.max(updatedAt, response.updatedOn);
     
     const data = response.positions.map(t => {
+      const stops = t.update.stop_time_update.map(t => ({
+        ...stations[t.stop_id],
+        arrival: t.arrival && t.arrival.time.low,
+        departure: t.departure && t.departure.time.low
+      }));
       
-      const next_stop = t.update.stop_time_update[0] && {
-        ...stations[t.update.stop_time_update[0].stop_id],
-        arrival: t.update.stop_time_update[0].arrival && new Date(t.update.stop_time_update[0].arrival.time.low*1000),
-        departure: t.update.stop_time_update[0].departure && new Date(t.update.stop_time_update[0].departure.time.low*1000)
-      };
+      const next_stop = stops[0];
+      
       const prev_stop = !(prev && prev[t.train_id] && prev[t.train_id].next_stop && next_stop) ? {} 
         : (prev[t.train_id].next_stop.stop_id == next_stop.stop_id) ? prev[t.train_id].prev_stop : prev[t.train_id].next_stop;
       
-      const since_departure = prev_stop && new Date(response.updatedOn * 1000) - new Date(prev_stop.departure)
-      const to_arrival = next_stop && next_stop.arrival - new Date(response.updatedOn * 1000)
+
+      const since_departure = prev_stop && response.updatedOn - prev_stop.departure
+      const to_arrival = next_stop && next_stop.arrival - response.updatedOn
       const pct_complete = Math.min(1, Math.max(0, since_departure / (to_arrival + since_departure)));
+
+      const train_loc = prev_stop && next_stop 
+        ? interpolatePath(t.vehicle.trip.trip_id, [prev_stop.stop_lon,prev_stop.stop_lat], [next_stop.stop_lon,next_stop.stop_lat], pct_complete)
+        : next_stop && [+next_stop.stop_lon, +next_stop.stop_lat];
+      
+      const waypoints = train_loc && getWaypoints(t.vehicle.trip.trip_id, train_loc, stops, response.updatedOn);
 
       return {
         train_id: t.train_id,
         train_dir: DIRS[+t.vehicle.trip['.nyct_trip_descriptor'].direction],
         trip_id: t.vehicle.trip.trip_id,
         route_id: t.vehicle.trip.route_id,
-        last_moved: t.vehicle.timestamp && new Date(1000*t.vehicle.timestamp.low),
+        last_moved: t.vehicle.timestamp && t.vehicle.timestamp.low,
         next_stop, 
         prev_stop,
         since_departure,
         to_arrival,
         pct_complete,
-        train_loc: prev_stop && next_stop 
-          ? interpolatePath(t.vehicle.trip.trip_id, [prev_stop.stop_lon,prev_stop.stop_lat], [next_stop.stop_lon,next_stop.stop_lat], pct_complete)
-          : next_stop && [+next_stop.stop_lon, +next_stop.stop_lat]
+        train_loc,
+        waypoints
       }
     });
 
     trains.push(...data);
   }));
+
   debug(`Loaded ${trains.length} latest arrival times`);
   debug(`${trains.filter(t => !t.train_loc).length} trains have no location`);
   // Write new arrivals to file for next request
@@ -143,7 +152,7 @@ router.get('/live', async function(req, res){
     debug('Wrote new data to data/trains.json');
   });
   
-  return res.send({type: 'subway', trains, updatedAt });
+  return res.send({type: 'subway', trains: trains, updatedAt });
 });
 
 

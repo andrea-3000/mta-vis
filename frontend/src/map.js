@@ -1,15 +1,18 @@
-//import { V4MAPPED } from "dns";
+// Helpers
+const interpolate = (p1, p2, pct) => [ p2[0]*pct+p1[0]*(1-pct), p2[1]*pct+p1[1]*(1-pct) ];
 
 mapboxgl.accessToken = "pk.eyJ1IjoiYW5kcmVhLTMwMDAiLCJhIjoiY2szZGtmbnB3MHBlczNib2swM29iM3dyMCJ9.ND3AF3iabUCSJJvHse4Mjg";
 let station_json;
 
-var map = new mapboxgl.Map({
+let map = new mapboxgl.Map({
     container: "map",
     style: "mapbox://styles/mapbox/light-v10",
     center: [-73.9864468, 40.7417373],
     zoom: 12.15,
     trackResize: true
 });
+
+let train_data = {};
 
 //40.7454736,-73.8995131,12.15
 //40.7417373,-73.9864468,13.45
@@ -87,9 +90,11 @@ async function drawStops(map) {
 
 async function updateTrains(map) {
     //console.log("UPDATING");
-    let updated_response = await fetch("https://comp426.peterandringa.com/mta/live");
-    let updated_data = await updated_response.json();
-    let trains = updated_data.trains.map( t => {
+    let updated_response = await fetch("https://comp426.peterandringa.com/mta/live").then(d => d.json());
+
+    train_data = updated_response.trains.map( t => {
+        
+        // Update sources
         let train_id = "train-"+t.train_id.replace(/ /g, "_");
         let source = map.getSource(train_id);
         if (!source){
@@ -105,6 +110,12 @@ async function updateTrains(map) {
                 console.error("Received invalid train location when updating, should we remove it?");
             }
         }
+
+        // store data
+        t.source = source || map.getSource(train_id);
+        t.map_id = train_id;
+
+        return t;
     });
 }
 
@@ -140,6 +151,32 @@ function getColor(id) {
             ];
 }
 
+function tick(){
+    
+    var now = Date.now()/1000; 
+    for(const t of train_data){
+        if(!t.waypoints || !t.waypoints[0] || !t.train_loc) continue;
+        
+        var pct = (now - t.waypoints[0].start) / t.waypoints[0].duration;
+        
+        while(t.waypoints && t.waypoints.length && t.waypoints[0].duration && pct > 1){
+            t.waypoints.shift(); // remove completed animations
+            pct = !t.waypoints[0] ? -1 : (now - t.waypoints[0].start) / t.waypoints[0].duration;
+        }
+        if(!t.waypoints[0] || !t.waypoints[0].duration || pct < 0) continue;
+
+        const new_loc = interpolate(t.train_loc, t.waypoints[0].loc, pct)
+        t.source.setData({
+            type: "Point",
+            coordinates: new_loc
+        });
+        t.train_loc = new_loc;
+    }
+
+    // Loop every animation frame
+    setTimeout(tick, 500);
+}
+
 map.on("load", async function() {
     await drawStops(map);
     await drawLines(map);
@@ -148,4 +185,7 @@ map.on("load", async function() {
     setInterval(() => {
         updateTrains(map);
     }, 30 * 1000);
+
+    // Start the clock
+    setTimeout(tick, 5000); // wait five seconds, then start movement
 });
