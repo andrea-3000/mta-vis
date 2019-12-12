@@ -1,4 +1,4 @@
-import { lineForRoute, renderLineIcons } from '../src/search.js';
+import { lineForRoute, renderLineIcons, renderLineIcon } from '../src/search.js';
 
 // Helpers
 const interpolate = (p1, p2, pct) => [ p2[0]*pct+p1[0]*(1-pct), p2[1]*pct+p1[1]*(1-pct) ];
@@ -184,7 +184,6 @@ function tick(){
 
 const display_date = date => {
     let diff = (date - (new Date())) / 1000; // convert ms to sec
-    console.log(diff);
     if( diff < 60 ){
         return 'now';
     }
@@ -208,40 +207,61 @@ export async function showPopup(id, name, coordinates) {
     const schedule_response = await fetch(`https://comp426.peterandringa.com/mta/stations/${id}/schedule`);
     let schedule_data = await schedule_response.json();
 
+
+
     let northbound = schedule_data.schedules[Object.keys(schedule_data.schedules)[0]].N;
     let southbound = schedule_data.schedules[Object.keys(schedule_data.schedules)[0]].S;
 
-    
+    let popupDiv = document.createElement("div");
+    popupDiv.classList.add("popup");
 
-    let html = `
-        <div class="popup">
-            <h3>${name}</h3>
-    `;
+    let h3 = document.createElement("h3");
+    h3.textContent = name;
+    popupDiv.appendChild(h3);
+
+    popupDiv.appendChild(renderLineIcons( lineForRoute(id[0]) ));
 
     if (northbound) {
-        html += `<h6>NORTHBOUND</h6>`
+        let nb = document.createElement("div");
+        nb.classList.add("northbound");
+
+        let nbHeader = document.createElement("h6");
+        nbHeader.textContent = "NORTHBOUND";
+        nb.appendChild(nbHeader);
+
         for (let i = 0; i < northbound.length; i++) {
-            let train = northbound[i];
-            html += `<p>${train.routeId}: ${display_date(new Date(train.arrivalTime * 1000))}</p>`
+            nb.appendChild(renderLineIcon(lineForRoute(id[0]), northbound[i].routeId));
+            let train = document.createElement("p");
+            train.textContent = `${display_date(new Date(northbound[i].arrivalTime * 1000))}`;
+            nb.appendChild(train);
         }
+
+        popupDiv.appendChild(nb);
     }
 
     if (southbound) {
-        html += `<h6>SOUTHBOUND</h6>`
-        for (let i = 0; i < southbound.length; i++) {
-            let train = southbound[i];
-            html += `<p>${train.routeId}: ${display_date(new Date(train.arrivalTime * 1000))}</p>`
-        }
-    }
+        let sb = document.createElement("div");
+        sb.classList.add("southbound");
 
-    html += `</div>`;
+        let sbHeader = document.createElement("h6");
+        sbHeader.textContent = "SOUTHBOUND";
+        sb.appendChild(sbHeader);
+
+        for (let i = 0; i < southbound.length; i++) {
+            let train = document.createElement("p");
+            train.textContent = `${southbound[i].routeId}: ${display_date(new Date(southbound[i].arrivalTime * 1000))}`;
+            sb.appendChild(train);
+        }
+        
+        popupDiv.appendChild(sb);
+    }
 
     let popup = new mapboxgl.Popup({
         closeButton: true,
         closeOnClick: true
     })
         .setLngLat(coordinates)
-        .setHTML(html);
+        .setHTML(popupDiv.innerHTML);
 
     popup.addTo(map);
 }

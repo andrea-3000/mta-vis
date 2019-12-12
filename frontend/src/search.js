@@ -1,7 +1,7 @@
 import { map, showPopup } from '../src/map.js';
 
 const lines = ['7', '123', '456', 'ACE', 'BDFM', 'G', 'JZ', 'L', 'NQR', 'S', 'SIR', 'FS', 'GS'];
-const lineForRoute = (id) => {
+export const lineForRoute = (id) => {
     if(id == 'S') return id; // special case for s, which overlaps with SIR/shuttles
     if(id == 'H') return 'ACE'; // special case for weird H train
     return lines.find( ln => ln.indexOf(id) != -1 ) || id;
@@ -19,7 +19,7 @@ const debounce = function debounce(time, fn){
     };
 }
 
-const renderLineIcons = (line) => {
+export const renderLineIcons = (line) => {
     const icons = document.createElement('div');
     icons.classList.add('line-group', 'group--'+line.toLowerCase());
     for(var i = 0; i < line.length; i++){
@@ -28,6 +28,16 @@ const renderLineIcons = (line) => {
         letter.textContent = line[i];
         icons.appendChild(letter);
     }
+    return icons;
+}
+
+export const renderLineIcon = (line_group, line) => {
+    const icons = document.createElement('div');
+    icons.classList.add('line-group', 'group--'+line_group.toLowerCase());
+    const letter = document.createElement('div');
+    letter.classList.add('line-group__line');
+    letter.textContent = line;
+    icons.appendChild(letter);
     return icons;
 }
 
