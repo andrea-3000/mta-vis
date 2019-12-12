@@ -50,7 +50,7 @@ router.get('/stations/:id/schedule', async function (req, res) {
       mta.schedule(req.params.id, feed)
         .catch(e => {
           console.log(`Error loading schedule for feed #${feed}.`);
-          errors = e;
+          errors = { ...e, feed };
           return {};
         })
     )
