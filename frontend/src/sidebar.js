@@ -12,6 +12,11 @@ document.querySelector('.right__button')
     }
   });
 
+// Renders favs
+async function renderFavorites(){
+  const favs = await API.getFavorites(); // array of favs
+}
+
 // Function to hide login screen and set user
 var currentUser;
 window._LOGGED_IN = false;
@@ -26,6 +31,9 @@ export function setUser(name){
 
   const fills = document.querySelectorAll('[data-fill="username"]');
   for(const f of fills) f.innerText = name;
+
+  document.querySelector('.user-favs__list')
+    .appendChild( renderFavorites() );
 }
 function undoUser(){
   window._LOGGED_IN = false;
@@ -35,7 +43,6 @@ function undoUser(){
 
   const fills = document.querySelectorAll('[data-fill="username"]');
   for(const f of fills) f.innerText = "";
-
 }
 
 // Test initial login status
