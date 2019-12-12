@@ -15,7 +15,7 @@ document.querySelector('.right__button')
 
 // Renders favs
 async function renderFavorites(){
-  const favs = window._FAVORITES || await API.getFavorites(); // array of favs
+  const favs = window._FAVORITES && window._FAVORITES.size ? window._FAVORITES : await API.getFavorites(); // array of favs
   const stops = (await window._STOPS).filter( stop => favs.has(stop.stop_id.toString()) );
   console.log(favs, stops);
   if(!stops || stops.length == 0){
@@ -104,6 +104,9 @@ loginButton.addEventListener('click', async function(){
   if(res.jwt){
     API.setCookie('jwt', res.jwt, 30); // expires in 30 days
     setUser(res.name);
+    usernameInput.value = "";
+    passwordInput.value = "";
+    loginButton.innerText = "Log In or Sign up";
   }else{
     console.error('Login error:', res);
   }

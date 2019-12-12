@@ -74,7 +74,8 @@ export function getCookie(name) {
   }
   return null;
 }
-export function eraseCookie(name) {   
+export function eraseCookie(name) {
+  window._FAVORITES = new Set();
   document.cookie = name+'=; Max-Age=-99999999;';  
 };
 
