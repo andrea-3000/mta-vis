@@ -4,7 +4,7 @@ const lines = ['7', '123', '456', 'ACE', 'BDFM', 'G', 'JZ', 'L', 'NQR', 'S', 'SI
 const lineForRoute = (id) => {
     if(id == 'S') return id; // special case for s, which overlaps with SIR/shuttles
     if(id == 'H') return 'ACE'; // special case for weird H train
-    return lines.find( ln => ln.indexOf(id) != -1 );
+    return lines.find( ln => ln.indexOf(id) != -1 ) || id;
 };
 
 const DEFAULT_DEBOUNCE = 100;
@@ -69,7 +69,7 @@ async function loadAutocomplete() {
                     center: [m.stop_lon, m.stop_lat],
                     zoom: 15,
                 });
-                closeAllLists();
+                removeItems();
             });
             list.appendChild(result);
         });
