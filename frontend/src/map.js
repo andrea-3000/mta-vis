@@ -2,9 +2,9 @@
 const interpolate = (p1, p2, pct) => [ p2[0]*pct+p1[0]*(1-pct), p2[1]*pct+p1[1]*(1-pct) ];
 
 mapboxgl.accessToken = "pk.eyJ1IjoiYW5kcmVhLTMwMDAiLCJhIjoiY2szZGtmbnB3MHBlczNib2swM29iM3dyMCJ9.ND3AF3iabUCSJJvHse4Mjg";
-let station_json;
 
-let map = new mapboxgl.Map({
+
+export let map = new mapboxgl.Map({
     container: "map",
     style: "mapbox://styles/mapbox/light-v10",
     center: [-73.9864468, 40.7417373],
@@ -59,7 +59,7 @@ async function drawLines(map) {
 
 async function drawStops(map) {
     const response = await fetch("https://comp426.peterandringa.com/mta/stations");
-    station_json = await response.json();
+    let station_json = await response.json();
     let stop_data = Object.values(station_json).filter( s => !s.stop_id.toString().match(/[NS]$/) );
     let geojson = stop_data.map( s => ({
         type: "Feature",
