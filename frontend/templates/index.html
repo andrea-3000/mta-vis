@@ -12,10 +12,16 @@
     <div class="map-overlay-left">
       <div class="map-overlay-box">
         <div class="map-overlay-content">
-          <div class="search">
-            <input type="text" id="station-search" name="station-search" placeholder="Search Stations">
-            <button id="search-button" type="submit"><i class="fas fa-search" aria-hidden="true"></i></button>
-          </div>
+          <form class="search" autocomplete="off">
+            <div class="autocomplete">
+              <input type="text" id="station-search" name="station-search" placeholder="Search Stations...">
+            </div>
+              <button id="search-button" type="submit"><i class="fas fa-search" aria-hidden="true"></i></button>
+          </form>
+        </div>
+      </div>
+      <div class="map-overlay-box">
+        <div id="results" class="map-overlay-content">
         </div>
       </div>
     </div>
@@ -38,63 +44,62 @@
       </div>
       <hr>
       <div class="right__bottom">
-          <h6>Line status</h6>
-          <div class="status-group group--bdfm">
-            <div class="status-group__line">B</div>
-            <div class="status-group__line">D</div>
-            <div class="status-group__line">F</div>
-            <div class="status-group__line">M</div>
+        <h6>Line status</h6>
+        <div class="status-group group--bdfm">
+          <div class="status-group__line">B</div>
+          <div class="status-group__line">D</div>
+          <div class="status-group__line">F</div>
+          <div class="status-group__line">M</div>
+          <div class="status-group__status"></div>
+        </div>
+        <div class="status-group group--ace">
+          <div class="status-group__line">A</div>
+          <div class="status-group__line">C</div>
+          <div class="status-group__line">E</div>
+          <div class="status-group__status"></div>
+        </div>
+        <div class="status-group group--123">
+          <div class="status-group__line">1</div>
+          <div class="status-group__line">2</div>
+          <div class="status-group__line">3</div>
+          <div class="status-group__status"></div>
+        </div>
+        <div class="status-group group--456">
+          <div class="status-group__line">4</div>
+          <div class="status-group__line">5</div>
+          <div class="status-group__line">6</div>
+          <div class="status-group__status"></div>
+        </div>
+        <div class="status-group group--g">
+            <div class="status-group__line">G</div>
             <div class="status-group__status"></div>
           </div>
-          <div class="status-group group--ace">
-            <div class="status-group__line">A</div>
-            <div class="status-group__line">C</div>
-            <div class="status-group__line">E</div>
+        <div class="status-group group--7">
+          <div class="status-group__line">7</div>
+          <div class="status-group__status"></div>
+        </div>
+        <div class="status-group group--l">
+          <div class="status-group__line">L</div>
+          <div class="status-group__status"></div>
+        </div>
+        <div class="status-group group--nqr">
+          <div class="status-group__line">N</div>
+          <div class="status-group__line">Q</div>
+          <div class="status-group__line">R</div>
+          <div class="status-group__status"></div>
+        </div>
+        <div class="status-group group--jz">
+            <div class="status-group__line">J</div>
+            <div class="status-group__line">Z</div>
             <div class="status-group__status"></div>
           </div>
-          <div class="status-group group--123">
-            <div class="status-group__line">1</div>
-            <div class="status-group__line">2</div>
-            <div class="status-group__line">3</div>
-            <div class="status-group__status"></div>
-          </div>
-          <div class="status-group group--456">
-            <div class="status-group__line">4</div>
-            <div class="status-group__line">5</div>
-            <div class="status-group__line">6</div>
-            <div class="status-group__status"></div>
-          </div>
-          <div class="status-group group--g">
-              <div class="status-group__line">G</div>
-              <div class="status-group__status"></div>
-            </div>
-          <div class="status-group group--7">
-            <div class="status-group__line">7</div>
-            <div class="status-group__status"></div>
-          </div>
-          <div class="status-group group--l">
-            <div class="status-group__line">L</div>
-            <div class="status-group__status"></div>
-          </div>
-          <div class="status-group group--nqr">
-            <div class="status-group__line">N</div>
-            <div class="status-group__line">Q</div>
-            <div class="status-group__line">R</div>
-            <div class="status-group__status"></div>
-          </div>
-          <div class="status-group group--jz">
-              <div class="status-group__line">J</div>
-              <div class="status-group__line">Z</div>
-              <div class="status-group__status"></div>
-            </div>
-          <div class="status-group group--s">
-            <div class="status-group__line">S</div>
-            <div class="status-group__status"></div>
-          </div>
-          <div class="status-group group--sir">
-            <div class="status-group__line">SIR</div>
-            <div class="status-group__status"></div>
-          </div>
+        <div class="status-group group--s">
+          <div class="status-group__line">S</div>
+          <div class="status-group__status"></div>
+        </div>
+        <div class="status-group group--sir">
+          <div class="status-group__line">SIR</div>
+          <div class="status-group__status"></div>
         </div>
       </div>
     </div>
