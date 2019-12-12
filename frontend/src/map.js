@@ -13,7 +13,7 @@ export let map = new mapboxgl.Map({
     container: "map",
     style: "mapbox://styles/mapbox/light-v10",
     center: [-73.9864468, 40.7417373],
-    zoom: 12.15,
+    zoom: 10.15,
     trackResize: true
 });
 
@@ -206,6 +206,32 @@ const display_date = date => {
 }
 
 export async function showPopup(id, name, coordinates) {
+    let popup = new mapboxgl.Popup({
+        closeButton: true,
+        closeOnClick: true
+    })
+        .setLngLat(coordinates)
+        .setHTML(renderSchedule(id, name, 2).innerHTML);
+
+    popup.addTo(map);
+
+    console.log('add listener', document.querySelector('#fav-btn-'+id));
+    document.querySelector('#fav-btn-'+id)
+    .addEventListener('click', function(){
+        console.log('clickity click')
+        if(!window._LOGGED_IN) return;
+        if(window._FAVORITES.has(id)){
+            API.removeFavorite(id);
+            this.classList.remove('fav--active');
+        }else{
+            API.addFavorite(id);
+            this.classList.add('fav--active');
+        }
+        setUser();
+    });
+}
+
+export async function renderSchedule(id, name, numTrains) {
     //fetch from endpoint with stop_id
     const schedule_response = await fetch(`https://comp426.peterandringa.com/mta/stations/${id}/schedule`);
     let schedule_data = await schedule_response.json();
@@ -233,7 +259,6 @@ export async function showPopup(id, name, coordinates) {
 
     titleRow.appendChild( renderLineIcons( lineForRoute(id[0]) ) );
 
-
     popupDiv.appendChild(titleRow);
 
     if(Object.keys(schedule_data.schedules).length == 0){
@@ -260,7 +285,8 @@ export async function showPopup(id, name, coordinates) {
             nbHeader.textContent = "NORTHBOUND";
             nb.appendChild(nbHeader);
 
-            for (let i = 0; i < northbound.length; i++) {
+            if (numTrains == 0) numTrains == northbound.length;
+            for (let i = 0; i < numTrains; i++) {
                 let row = document.createElement('div');
                 row.classList.add('popup__row');
 
@@ -285,7 +311,8 @@ export async function showPopup(id, name, coordinates) {
             sbHeader.textContent = "SOUTHBOUND";
             sb.appendChild(sbHeader);
 
-            for (let i = 0; i < southbound.length; i++) {
+            if (numTrains == 0) numTrains == southbound.length;
+            for (let i = 0; i < numTrains; i++) {
                 let row = document.createElement('div');
                 row.classList.add('popup__row');
 
@@ -305,29 +332,7 @@ export async function showPopup(id, name, coordinates) {
         popupDiv.append(trainTimes);
     }
 
-    let popup = new mapboxgl.Popup({
-        closeButton: true,
-        closeOnClick: true
-    })
-        .setLngLat(coordinates)
-        .setHTML(popupDiv.innerHTML);
-
-    popup.addTo(map);
-
-    console.log('add listener', document.querySelector('#fav-btn-'+id));
-    document.querySelector('#fav-btn-'+id)
-    .addEventListener('click', function(){
-        console.log('clickity click')
-        if(!window._LOGGED_IN) return;
-        if(window._FAVORITES.has(id)){
-            API.removeFavorite(id);
-            this.classList.remove('fav--active');
-        }else{
-            API.addFavorite(id);
-            this.classList.add('fav--active');
-        }
-        setUser();
-    });
+    return popupDiv;
 }
 
 map.on('click', 'stops', async function(e) {

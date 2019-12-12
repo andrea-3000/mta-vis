@@ -1,4 +1,5 @@
 import API from "./api";
+import renderSchedule from "./map";
 
 const container = document.querySelector('.map-overlay-right')
 
@@ -15,6 +16,7 @@ document.querySelector('.right__button')
 // Renders favs
 async function renderFavorites(){
   const favs = await API.getFavorites(); // array of favs
+  //renderSchedule(id, name, numTrains);
 }
 
 // Function to hide login screen and set user
