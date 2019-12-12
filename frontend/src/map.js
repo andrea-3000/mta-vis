@@ -49,7 +49,7 @@ async function drawLines(map) {
             "line-color": getColor(["get", "rt_symbol"])
             /* something glitchy happening w/ the data that tthe offset is weird here, not going to do it for now */
             /* "line-offset":
-                 ["match", ["get", "rt_symbol"],
+                ["match", ["get", "rt_symbol"],
                     ["B", "D", "F", "M"], 2, 0
                 ], */
         }
@@ -59,10 +59,13 @@ async function drawLines(map) {
 
 async function drawStops(map) {
     const response = await fetch("https://comp426.peterandringa.com/mta/stations");
-    let station_json = await response.json();
-    let stop_data = Object.values(station_json).filter( s => !s.stop_id.toString().match(/[NS]$/) );
+    let stop_data = await response.json();
     let geojson = stop_data.map( s => ({
         type: "Feature",
+        "properties": {
+            "stop_id": s.stop_id,
+            "stop_name": s.stop_name,
+        },
         geometry: {
           type: "Point",
           coordinates: [s.stop_lon, s.stop_lat]
@@ -176,6 +179,77 @@ function tick(){
     // Loop every animation frame
     setTimeout(tick, 500);
 }
+
+const display_date = date => {
+    let diff = (date - (new Date())) / 1000; // convert ms to sec
+    console.log(diff);
+    if( diff < 60 ){
+        return 'now';
+    }
+    diff = Math.round(diff / 60); // convert sec to min
+    if(diff < 60 ){
+        return `${diff}m`;
+    }
+    diff = Math.round(diff / 60); // convert min to hour
+    if( diff < 24 ){
+        return `${diff}h`;
+    }
+    diff = Math.round(diff / 24); // convert hours to days
+    if( diff < 30){
+        return `${diff}d`;
+    }
+    return "LARGE TIME (probably wrong)";
+}
+
+export async function showPopup(id, name, coordinates) {
+    //fetch from endpoint with stop_id
+    const schedule_response = await fetch(`https://comp426.peterandringa.com/mta/stations/${id}/schedule`);
+    let schedule_data = await schedule_response.json();
+
+    let northbound = schedule_data.schedules[Object.keys(schedule_data.schedules)[0]].N;
+    let southbound = schedule_data.schedules[Object.keys(schedule_data.schedules)[0]].S;
+
+    let html = `
+        <div class="popup">
+            <h3>${name}</h3>
+    `;
+
+    if (northbound) {
+        html += `<h6>NORTHBOUND</h6>`
+        for (let i = 0; i < northbound.length; i++) {
+            let train = northbound[i];
+            html += `<p>${train.routeId}: ${display_date(new Date(train.arrivalTime * 1000))}</p>`
+        }
+    }
+
+    if (southbound) {
+        html += `<h6>SOUTHBOUND</h6>`
+        for (let i = 0; i < southbound.length; i++) {
+            let train = southbound[i];
+            html += `<p>${train.routeId}: ${display_date(new Date(train.arrivalTime * 1000))}</p>`
+        }
+    }
+
+    html += `</div>`;
+
+    let popup = new mapboxgl.Popup({
+        closeButton: true,
+        closeOnClick: true
+    })
+        .setLngLat(coordinates)
+        .setHTML(html);
+
+    popup.addTo(map);
+}
+
+map.on('click', 'stops', async function(e) {
+    var coordinates = e.features[0].geometry.coordinates.slice();
+    var stop_id = e.features[0].properties["stop_id"];
+    var stop_name = e.features[0].properties["stop_name"];
+
+    await showPopup(stop_id, stop_name, coordinates);
+
+});
 
 map.on("load", async function() {
     await drawStops(map);

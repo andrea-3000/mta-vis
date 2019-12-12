@@ -1,4 +1,4 @@
-import { map } from '../src/map.js';
+import { map, showPopup } from '../src/map.js';
 
 async function loadAutocomplete() {
     /* REFERENCING W3 SCHOOLS: https://www.w3schools.com/howto/howto_js_autocomplete.asp */
@@ -6,8 +6,7 @@ async function loadAutocomplete() {
     let input = document.getElementById("station-search");
 
     const response = await fetch("https://comp426.peterandringa.com/mta/stations");
-    let station_json = await response.json();
-    let stop_data = Object.values(station_json).filter( s => !s.stop_id.toString().match(/[NS]$/) );
+    let stop_data = await response.json();
 
     let focus;
 
@@ -28,7 +27,7 @@ async function loadAutocomplete() {
         matches.forEach( m => {
             let result = document.createElement("div");
             result.innerHTML += "<input value='" + m.stop_name + "'>";
-            result.addEventListener("click", function(e) {
+            result.addEventListener("click", async function(e) {
                 input.value = this.getElementsByTagName("input")[0].value;
                 let coordinates = [m.stop_lon, m.stop_lat];
                 map.flyTo({
@@ -36,20 +35,8 @@ async function loadAutocomplete() {
                     zoom: 15,
                 });
 
-                let html = `
-                    <div id="popup">
-                        <h3>${m.stop_name}</h3>
-                    </div>
-                `;
+                await showPopup(m.stop_id, m.stop_name, coordinates);
 
-                let popup = new mapboxgl.Popup({
-                    closeButton: true,
-                    closeOnClick: true
-                })
-                    .setLngLat(coordinates)
-                    .setHTML(html);
-
-                popup.addTo(map);
                 closeAllLists();
             });
             list.appendChild(result);
@@ -95,29 +82,6 @@ async function loadAutocomplete() {
             }
         }
     }
-}
-
-const display_date = date => {
-  let diff = ((new Date()) - date) / 1000; // convert ms to sec
-  if( diff < 60 ){
-    return 'now';
-  }
-  diff = Math.round(diff / 60); // convert sec to min
-  if(diff < 60 ){
-    return `${diff}m`;
-  }
-  diff = Math.round(diff / 60); // convert min to hour
-  if( diff < 24 ){
-    return `${diff}h`;
-  }
-  diff = Math.round(diff / 24); // convert hours to days
-  if( diff < 30){
-    return `${diff}d`;
-  }
-  if(diff < 365){ // if within one year, use Month day
-    return yearFormat(date);
-  }
-  return fullFormat(date)
 }
 
 window.addEventListener("load", async function() {
