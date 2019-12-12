@@ -83,19 +83,23 @@ h1 {
     margin: 0 0 15px;
 }
 
-.autocomplete-items div {
+.ac-items div {
     padding: 10px;
     cursor: pointer;
 }
 
-.autocomplete-items div:hover {
+.ac-items div:hover {
     /*when hovering an item:*/
     background-color: #e9e9e9; 
 }
 
-.autocomplete-active {
+.ac-active {
     /*when navigating through the items using the arrow keys:*/
     background-color: #e9e9e9; 
+}
+
+#popup {
+    padding: 10px;
 }
 
 /** NASTY PLACEHOLDER **/
