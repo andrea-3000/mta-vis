@@ -207,13 +207,22 @@ export async function showPopup(id, name, coordinates) {
     const schedule_response = await fetch(`https://comp426.peterandringa.com/mta/stations/${id}/schedule`);
     let schedule_data = await schedule_response.json();
 
-
-
     let northbound = schedule_data.schedules[Object.keys(schedule_data.schedules)[0]].N;
     let southbound = schedule_data.schedules[Object.keys(schedule_data.schedules)[0]].S;
 
     let popupDiv = document.createElement("div");
     popupDiv.classList.add("popup");
+
+    let favoriteBtn = document.createElement("button");
+    let star = document.createElement("i");
+    star.classList.add("fas", "fa-star", "popup-star");
+
+    favoriteBtn.appendChild(star);
+    favoriteBtn.addEventListener("click", function(e) {
+        console.log("TODO: add to favorites");
+    });
+
+    popupDiv.appendChild(favoriteBtn);
 
     let h3 = document.createElement("h3");
     h3.textContent = name;
@@ -248,8 +257,9 @@ export async function showPopup(id, name, coordinates) {
         sb.appendChild(sbHeader);
 
         for (let i = 0; i < southbound.length; i++) {
+            sb.appendChild(renderLineIcon(lineForRoute(id[0]), southbound[i].routeId));
             let train = document.createElement("p");
-            train.textContent = `${southbound[i].routeId}: ${display_date(new Date(southbound[i].arrivalTime * 1000))}`;
+            train.textContent = `${display_date(new Date(southbound[i].arrivalTime * 1000))}`;
             sb.appendChild(train);
         }
         

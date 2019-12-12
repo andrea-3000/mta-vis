@@ -133,6 +133,5 @@ async function loadAutocomplete() {
 }
 
 window.addEventListener("load", async function() {
-    console.log("LOADING!");
     loadAutocomplete();
 });
