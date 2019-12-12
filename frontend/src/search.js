@@ -1,9 +1,29 @@
 import { map } from '../src/map.js';
 
+const lines = ['7', '123', '456', 'ACE', 'BDFM', 'G', 'JZ', 'L', 'NQR', 'S', 'SIR', 'FS', 'GS'];
+const lineForRoute = (id) => {
+  if(id == 'S') return id; // special case for s, which overlaps with SIR/shuttles
+  if(id == 'H') return 'ACE'; // special case for weird H train
+  return lines.find( ln => ln.indexOf(id) != -1 );
+};
+
+const renderLineIcons = (line) => {
+    const icons = document.createElement('div');
+    icons.classList.add('line-group', 'group--'+line.toLowerCase());
+    for(var i = 0; i < line.length; i++){
+        const letter = document.createElement('div');
+        letter.classList.add('line-group__line');
+        letter.textContent = line[i];
+        icons.appendChild(letter);
+    }
+    return icons;
+}
+
 async function loadAutocomplete() {
     /* REFERENCING W3 SCHOOLS: https://www.w3schools.com/howto/howto_js_autocomplete.asp */
 
     let input = document.getElementById("station-search");
+    let list = document.querySelector(".results-box");
 
     const response = await fetch("https://comp426.peterandringa.com/mta/stations");
     let station_json = await response.json();
@@ -13,24 +33,26 @@ async function loadAutocomplete() {
 
     input.addEventListener("input", function(e) {
         let value = this.value;
-
-        closeAllLists();
+        
+        removeItems();
         currentFocus = -1;
 
-        let list = document.createElement("div");
-        list.setAttribute("id", this.id + "autocomplete-list");
-        list.setAttribute("class", "autocomplete-items");
-        document.getElementById("results").appendChild(list);
-
         if (!value) return false;
+
         var regex = new RegExp(value, "i");
         let matches = stop_data.filter(s => regex.exec(s.stop_name));
         matches.forEach( m => {
             let result = document.createElement("div");
-            result.innerHTML += "<input value='" + m.stop_name + "'>";
+            result.classList.add('result-item');
+            
+            let resultText = document.createElement("div");
+            resultText.classList.add('result-item__text');
+            resultText.innerText = m.stop_name;
+            result.appendChild(resultText);
+
+            result.appendChild(renderLineIcons( lineForRoute(m.stop_id[0]) ));
+
             result.addEventListener("click", function(e) {
-                input.value = this.getElementsByTagName("input")[0].value;
-                console.log(map);
                 map.flyTo({
                     center: [m.stop_lon, m.stop_lat],
                     zoom: 15,
@@ -43,54 +65,51 @@ async function loadAutocomplete() {
 
     /*execute a function presses a key on the keyboard:*/
     input.addEventListener("keydown", function(e) {
-        var list = document.getElementById(this.id + "autocomplete-list");
-        if (list) list = list.getElementsByTagName("div");
+        let items = list.querySelectorAll(".result-item");
         if (e.keyCode == 40) {
             /*If the arrow DOWN key is pressed,
             increase the currentFocus variable:*/
             currentFocus++;
             /*and and make the current item more visible:*/
-            addActive(list);
+            addActive(items);
         } else if (e.keyCode == 38) { //up
             /*If the arrow UP key is pressed,
             decrease the currentFocus variable:*/
             currentFocus--;
             /*and and make the current item more visible:*/
-            addActive(list);
+            addActive(items);
         } else if (e.keyCode == 13) {
             /*If the ENTER key is pressed, prevent the form from being submitted,*/
             e.preventDefault();
             if (currentFocus > -1) {
             /*and simulate a click on the "active" item:*/
-            if (list) list[currentFocus].click();
+            if (items) items[currentFocus].click();
             }
         }
     });
 
-    function addActive(list) {
+    function addActive(items) {
         /*a function to classify an item as "active":*/
-        if (!list) return false;
+        if (!items) return false;
         /*start by removing the "active" class on all items:*/
-        removeActive(list);
-        if (currentFocus >= list.length) currentFocus = 0;
-        if (currentFocus < 0) currentFocus = (list.length - 1);
+        removeActive(items);
+        if (currentFocus >= items.length) currentFocus = 0;
+        if (currentFocus < 0) currentFocus = (items.length - 1);
         /*add class "autocomplete-active":*/
-        list[currentFocus].classList.add("autocomplete-active");
+        items[currentFocus].classList.add("item--active");
     }
 
-    function removeActive(list) {
+    function removeActive(items) {
         /*a function to remove the "active" class from all autocomplete items:*/
-        for (var i = 0; i < list.length; i++) {
-            list[i].classList.remove("autocomplete-active");
+        for (var i = 0; i < items.length; i++) {
+            items[i].classList.remove("item--active");
         }
     }
 
-    function closeAllLists(element) {
-        var list = document.getElementsByClassName("autocomplete-items");
-        for (var i = 0; i < list.length; i++) {
-            if (element != list[i] && element != input) {
-                list[i].parentNode.removeChild(list[i]);
-            }
+    function removeItems() {
+        let items = list.querySelectorAll('.result-item');
+        for(var i = 0; i < items.length; i++){
+            items[i].remove();
         }
     }
 }
