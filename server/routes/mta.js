@@ -44,13 +44,13 @@ router.get('/stations/:id', async function (req, res) {
  * Get a specific MTA station schedule
  */
 router.get('/stations/:id/schedule', async function (req, res) {
-  var errors = null;
+  var errors = [];
   const schedules = (await Promise.all(
     feed_ids.map( feed =>
       mta.schedule(req.params.id, feed)
         .catch(e => {
           console.log(`Error loading schedule for feed #${feed}.`);
-          errors = { ...e, feed };
+          errors.push(feed);
           return {};
         })
     )
