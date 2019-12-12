@@ -2,6 +2,8 @@ import { lineForRoute, renderLineIcons, renderLineIcon } from '../src/search.js'
 import API from './api.js';
 import { setUser } from './sidebar.js';
 
+let NYC_CENTER_COORDINATES = [-73.9864468, 40.7417373];
+
 // Helpers
 const interpolate = (p1, p2, pct) => [ p2[0]*pct+p1[0]*(1-pct), p2[1]*pct+p1[1]*(1-pct) ];
 
@@ -341,6 +343,11 @@ map.on("load", async function() {
     await drawStops(map);
     await drawLines(map);
     await updateTrains(map);
+
+    setTimeout(map.flyTo({
+        center: NYC_CENTER_COORDINATES,
+        zoom: 12.15
+    }), 3000);
 
     setInterval(() => {
         updateTrains(map);
